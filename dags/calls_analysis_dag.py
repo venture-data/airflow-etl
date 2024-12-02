@@ -22,9 +22,9 @@ export_calls_analysis = MySQLToGCSOperator(
     task_id='export_calls_analysis',
     mysql_conn_id='mysql_default',
     google_cloud_storage_conn_id='google_cloud_default',
-    bucket='your-gcs-bucket-name',
+    bucket='twilio-airflow',
     filename='exports/calls_analysis/{{ ds }}/calls_analysis.csv',
-    sql='SELECT * FROM calls_analysis',
+    sql='SELECT * FROM `whisper-db`.`calls_analysis`',
     dag=dag
 )
 
