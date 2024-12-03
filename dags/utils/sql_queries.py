@@ -21,3 +21,14 @@ CALLS_ANALYSIS_MERGE_QUERY = """
         VALUES (id, call_details_id, transcription, overall_sentiment, 
                 keywords, created_at, updated_at, deleted_at)
 """
+
+CALLS_STATUS_MERGE_QUERY = """
+    MERGE INTO `video-data-436506.whisper.calls_status` T
+    USING `video-data-436506.whisper.temp_calls_status` S
+    ON T.call_sid = S.call_sid
+    WHEN NOT MATCHED THEN
+        INSERT (call_sid, status, call_from, call_to, 
+                created_at, updated_at, deleted_at)
+        VALUES (call_sid, status, call_from, call_to, 
+                created_at, updated_at, deleted_at)
+"""

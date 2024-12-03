@@ -3,7 +3,7 @@ from airflow.providers.google.cloud.transfers.mysql_to_gcs import MySQLToGCSOper
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.providers.google.cloud.transfers.gcs_to_bigquery import GCSToBigQueryOperator
 from datetime import datetime, timedelta
-from utils.sql_queries import CALLS_ANALYSIS_MERGE_QUERY
+from utils.sql_queries import CALLS_STATUS_MERGE_QUERY
 
 default_args = {
     'owner': 'airflow',
@@ -16,7 +16,7 @@ default_args = {
 }
 
 dag = DAG(
-    'calls_analysis_etl',
+    'calls_status_etl',
     default_args=default_args,
     schedule_interval='@hourly',
     catchup=False,
@@ -24,12 +24,12 @@ dag = DAG(
 )
 
 export_calls_analysis = MySQLToGCSOperator(
-    task_id='export_calls_analysis',
+    task_id='export_calls_status',
     mysql_conn_id='mysql_default',
     gcp_conn_id='google_cloud_default',
     bucket='twilio-airflow',
-    filename='exports/calls_analysis/{{ ds }}/calls_analysis.csv',
-    sql='SELECT * FROM `whisper-db`.`calls_analysis`',
+    filename='exports/calls_status/{{ ds }}/calls_status.csv',
+    sql='SELECT * FROM `whisper-db`.`calls_status`',
     export_format='csv',        # Added this
     field_delimiter=',',        # Added this
     dag=dag
@@ -38,18 +38,16 @@ export_calls_analysis = MySQLToGCSOperator(
 load_to_bq = GCSToBigQueryOperator(
     task_id='load_to_bigquery',
     bucket='twilio-airflow',
-    source_objects=['exports/calls_analysis/{{ ds }}/calls_analysis.csv'],
-    destination_project_dataset_table='video-data-436506.whisper.temp_calls_analysis',
+    source_objects=['exports/calls_status/{{ ds }}/calls_status.csv'],
+    destination_project_dataset_table='video-data-436506.whisper.temp_calls_status',
     schema_fields=[
-        {'name': 'id', 'type': 'INTEGER', 'mode': 'REQUIRED'},
-        {'name': 'call_details_id', 'type': 'INTEGER', 'mode': 'REQUIRED'},
-        {'name': 'transcription', 'type': 'STRING', 'mode': 'REQUIRED'},
-        {'name': 'overall_sentiment', 'type': 'STRING', 'mode': 'REQUIRED'},
-        {'name': 'keywords', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'call_sid', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'status', 'type': 'STRING', 'mode': 'NULLABLE'},
+        {'name': 'call_from', 'type': 'STRING', 'mode': 'NULLABLE'},
+        {'name': 'call_to', 'type': 'STRING', 'mode': 'NULLABLE'},
         {'name': 'created_at', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'},
         {'name': 'updated_at', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'},
-        {'name': 'deleted_at', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'},
-        {'name': 'reasoning', 'type': 'STRING', 'mode': 'NULLABLE'}
+        {'name': 'deleted_at', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'}
     ],
     write_disposition='WRITE_TRUNCATE',
     dag=dag
@@ -59,7 +57,7 @@ merge_to_bq = BigQueryInsertJobOperator(
     task_id='merge_to_bigquery',
     configuration={
         'query': {
-            'query': CALLS_ANALYSIS_MERGE_QUERY,
+            'query': CALLS_STATUS_MERGE_QUERY,
             'useLegacySql': False,
         }
     },
