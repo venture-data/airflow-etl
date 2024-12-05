@@ -52,6 +52,9 @@ load_to_bq = GCSToBigQueryOperator(
         {'name': 'reasoning', 'type': 'STRING', 'mode': 'NULLABLE'}
     ],
     write_disposition='WRITE_TRUNCATE',
+    skip_leading_rows=1,
+    allow_quoted_newlines=True,
+    field_delimiter=',',
     dag=dag
 )
 
