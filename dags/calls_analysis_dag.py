@@ -30,12 +30,9 @@ export_calls_analysis = MySQLToGCSOperator(
     bucket='twilio-airflow',
     filename='exports/calls_analysis/{{ ds }}/calls_analysis.csv',
     sql='SELECT * FROM `whisper-db`.`calls_analysis`',
-    export_format='csv',        # Added this
-    field_delimiter=',',        # Added this
-    export_params={
-        'quoting': 1,  # QUOTE_ALLs
-        'quotechar': '"'
-    },
+    export_format='csv',
+    field_delimiter=',',
+    ensure_utf8=True,
     dag=dag
 )
 
