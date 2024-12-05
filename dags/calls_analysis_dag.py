@@ -32,6 +32,7 @@ export_calls_analysis = MySQLToGCSOperator(
     sql='SELECT * FROM `whisper-db`.`calls_analysis`',
     export_format='csv',        # Added this
     field_delimiter=',',        # Added this
+    quote_character='"',
     dag=dag
 )
 
@@ -52,6 +53,8 @@ load_to_bq = GCSToBigQueryOperator(
         {'name': 'reasoning', 'type': 'STRING', 'mode': 'NULLABLE'}
     ],
     write_disposition='WRITE_TRUNCATE',
+    quote_character='"',
+    allow_quoted_newlines=True,
     dag=dag
 )
 
