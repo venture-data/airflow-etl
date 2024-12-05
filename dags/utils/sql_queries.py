@@ -17,9 +17,9 @@ CALLS_ANALYSIS_MERGE_QUERY = """
     ON T.id = S.id
     WHEN NOT MATCHED THEN
         INSERT (id, call_details_id, transcription, overall_sentiment, 
-                keywords, created_at, updated_at, deleted_at)
+                keywords, created_at, updated_at, deleted_at, reasoning)
         VALUES (id, call_details_id, transcription, overall_sentiment, 
-                keywords, created_at, updated_at, deleted_at)
+                keywords, created_at, updated_at, deleted_at, reasoning)
 """
 
 CALLS_STATUS_MERGE_QUERY = """
