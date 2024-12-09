@@ -18,7 +18,7 @@ default_args = {
 dag = DAG(
     'call_details_etl',
     default_args=default_args,
-    schedule_interval='@hourly',
+    schedule_interval='*/1 * * * *',
     catchup=False,
     max_active_runs=1 
 )
