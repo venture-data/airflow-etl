@@ -2,3 +2,4 @@ venv
 logs/
 .env
 config/video-data-436506.json
+__pycache__/
