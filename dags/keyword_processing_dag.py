@@ -40,20 +40,22 @@ process_keywords = BigQueryInsertJobOperator(
         'query': {
             'query': """
             WITH cleaned_data AS (
-              SELECT 
+                SELECT 
+                    id,
+                    TRIM(REPLACE(REPLACE(keywords, '"', ''), "'", '')) as keywords,
+                    overall_sentiment
+                FROM `video-data-436506.whisper.calls_analysis`
+                WHERE keywords IS NOT NULL AND keywords != ''
+                )
+
+                SELECT 
                 id,
-                TRIM(REPLACE(REPLACE(keywords, '"', ''), "'", '')) as keywords
-              FROM `video-data-436506.whisper.calls_analysis`
-              WHERE keywords IS NOT NULL AND keywords != ''
-            )
-            
-            SELECT 
-              id,
-              TRIM(keyword) as keyword
-            FROM cleaned_data,
-            UNNEST(SPLIT(keywords, ',')) as keyword
-            WHERE TRIM(keyword) != ''
-            ORDER BY id, keyword
+                TRIM(keyword) as keyword,
+                overall_sentiment
+                FROM cleaned_data,
+                UNNEST(SPLIT(keywords, ',')) as keyword
+                WHERE TRIM(keyword) != ''
+                ORDER BY id, keyword
             """,
             'destinationTable': {
                 'projectId': 'video-data-436506',
